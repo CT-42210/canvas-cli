@@ -1,6 +1,6 @@
 # Canvas CLI
 
-A modern command-line interface for Clemson University's Canvas LMS.
+A modern command-line interface for any University's Canvas LMS.
 
 ## Features
 
