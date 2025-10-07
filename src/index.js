@@ -8,6 +8,7 @@ const assignmentCommand = require('./commands/assignment');
 const submitCommand = require('./commands/submit');
 const rawCommand = require('./commands/raw');
 const openCommand = require('./commands/open');
+const aboutCommand = require('./commands/about');
 const chalk = require('chalk');
 
 const program = new Command();
@@ -88,6 +89,12 @@ program
   .command('open')
   .description('Open Canvas in default browser')
   .action(openCommand);
+
+// About command
+program
+  .command('about')
+  .description('Display version and project information')
+  .action(aboutCommand);
 
 // Check if no command provided before parsing
 const args = process.argv.slice(2);
