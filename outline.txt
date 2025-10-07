@@ -1,0 +1,44 @@
+CANVAS CLI OUTLINE
+
+This application is a CLI interface with Clemsons Canvas page (by instructure)
+
+Design a CLI tool with these specifications:
+
+"canvas" is the base command added to path
+
+The select functionality should replicate firebases select functionality, which uses the arrow keys to sort up and down and the space bar/enter key to confirm the currently selected item. this will be used to sort between assignments, classes, any sort of navigation
+
+The display functionality should mimic a popup, but through a CLI. Once desplaying the desired information, the program should give a list of action items, listed with numbers to execute. the user can either press enter with no number to return to the terminal, or press a number corresponding to those actions to execute them. some examples of actions could be to open the current item on canvas in a web browser, to submit an assignment with a file, etc. 
+
+the general feel of this CLI app should be modern. use the colors for each class from canvas for accents. 
+
+Commands and descriptions
+
+canvas auth - add canvas auth token to enviroment
+
+canvas OR canvas list - list all assignments with duedates within the next three days list items by this heiarchy: due date, class order in canvas
+
+canvas list all - list all assignments
+
+canvas list all due - list all due assignments
+
+canvas list all overdue - list all overdue assignments
+
+canvas class - lists class details. use select functionality to sort class. 
+
+canvas class all - same as canvas class, but lists all assignments. 
+
+canvas assignment - find canvas assignment, use select framework for which class, followed by which assignment. list all details relevant. by default, this command should list only the items due within the next three days. 
+
+canvas assignment all - same as canvas assignment, but lists all assignments
+
+canvas submit - submits a file for assignment. uses select feature to navigate to assignment, then uses it to select a file in the current directory. this command should sort assignments to file upload only. 
+
+canvas raw [any command] - returns raw unformatted data from the API
+
+canvas open - opens canvas in the default browser
+
+DIRECTIONS FOR DEVELOPING THIS APP:
+
+- NEVER truncate errors. if there are errors, display the entire message. EVERY TIME. NO EXCEPTIONS.
+- When fleshing out the API calls, do not assume that you understand the message format. Double check, either by referencing the docs of the canvas API or by designing test cases to see the format. as it will be returned
