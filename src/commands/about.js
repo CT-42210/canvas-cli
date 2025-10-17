@@ -92,13 +92,19 @@ async function aboutCommand() {
   const canvasUrl = config.getCanvasUrl();
   const institutionName = canvasUrl ? extractInstitutionName(canvasUrl) : null;
 
-  // Generate ASCII art for Canvas logo from local file
-  const logoPath = path.join(__dirname, '../../canvas.png');
-  const canvasAscii = await imageToAscii(logoPath, { width: 30, height: 18, color: false });
+  // Generate ASCII art for both logos from local files
+  const canvasLogoPath = path.join(__dirname, '../../canvas.png');
+  const nssLogoPath = path.join(__dirname, '../../nss.png');
 
-  if (canvasAscii) {
-    // Color the logo red
+  const canvasAscii = await imageToAscii(canvasLogoPath, { width: 30, height: 18, color: false });
+  const nssAscii = await imageToAscii(nssLogoPath, { width: 30, height: 18, color: true });
+
+  if (canvasAscii && nssAscii) {
+    // Color the Canvas logo red
     const redLogo = canvasAscii.split('\n').map(line => chalk.red(line)).join('\n');
+
+    // Combine both logos side by side
+    const combinedLogos = combineAsciiSideBySide(redLogo, nssAscii, 6);
 
     // Create info text
     const info = [
@@ -123,11 +129,33 @@ async function aboutCommand() {
     info.push(chalk.gray('A modern CLI for Canvas LMS'));
     info.push(chalk.gray('Built with Node.js, Inquirer, and Chalk'));
 
-    // Combine logo and info side by side
-    const combined = combineAsciiSideBySide(redLogo, info.join('\n'), 8);
-    console.log(combined.split('\n').map(line => '  ' + line).join('\n'));
+    // Display logos on top
+    console.log(combinedLogos.split('\n').map(line => '  ' + line).join('\n'));
+
+    // Display info text underneath
+    console.log('');
+    console.log(info.map(line => '  ' + line).join('\n'));
+  } else if (canvasAscii) {
+    // Fallback to just Canvas logo if NSS logo fails to load
+    const redLogo = canvasAscii.split('\n').map(line => chalk.red(line)).join('\n');
+    console.log(redLogo.split('\n').map(line => '  ' + line).join('\n'));
+    console.log('');
+
+    console.log(chalk.bold('  Version:  ') + chalk.green(`v${version}`));
+    console.log(chalk.bold('  Author:   ') + chalk.yellow('Negative Space Software'));
+    console.log(chalk.bold('  GitHub:   ') + chalk.blue('https://github.com/negative-space-software/canvas-cli'));
+
+    if (institutionName && canvasUrl) {
+      console.log(chalk.bold('  School:   ') + chalk.white(institutionName));
+      console.log(chalk.bold('  Canvas:   ') + chalk.gray(canvasUrl));
+    } else {
+      console.log(chalk.yellow('\n  Not authenticated - run ') + chalk.cyan('canvas auth'));
+    }
+
+    console.log(chalk.gray('\n  A modern CLI for Canvas LMS'));
+    console.log(chalk.gray('  Built with Node.js, Inquirer, and Chalk'));
   } else {
-    // Fallback if logo fails to load
+    // Fallback if both logos fail to load
     console.log(chalk.bold('  Version:  ') + chalk.green(`v${version}`));
     console.log(chalk.bold('  Author:   ') + chalk.yellow('Negative Space Software'));
     console.log(chalk.bold('  GitHub:   ') + chalk.blue('https://github.com/negative-space-software/canvas-cli'));
