@@ -1,6 +1,6 @@
 CANVAS CLI OUTLINE
 
-This application is a CLI interface with Clemsons Canvas page (by instructure)
+This application is a CLI interface for Canvas LMS (by Instructure). Works with any university or school that uses Canvas.
 
 Design a CLI tool with these specifications:
 

@@ -15,7 +15,7 @@ const program = new Command();
 
 program
   .name('canvas')
-  .description('CLI tool for Clemson Canvas LMS')
+  .description('CLI tool for Canvas LMS')
   .version('1.0.0');
 
 // Auth command

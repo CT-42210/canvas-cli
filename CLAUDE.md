@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Canvas CLI is a command-line interface for interacting with Clemson University's Canvas LMS (by Instructure).
+Canvas CLI is a command-line interface for interacting with Canvas LMS (by Instructure). Works with any university or school that uses Canvas.
 
 **IMPORTANT**: For complete project specifications, commands, and development requirements, always reference `outline.txt` in the project root. The outline contains the authoritative specification for CLI commands, UI/UX requirements, and critical development guidelines.
 

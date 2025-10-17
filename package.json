@@ -1,7 +1,7 @@
 {
   "name": "canvas-cli",
   "version": "1.0.0",
-  "description": "CLI tool for Clemson Canvas LMS",
+  "description": "CLI tool for Canvas LMS - works with any university or school",
   "main": "src/index.js",
   "bin": {
     "canvas": "./src/index.js"
@@ -10,8 +10,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/index.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["canvas", "lms", "cli", "education", "instructure"],
+  "author": "Negative Space Software",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {

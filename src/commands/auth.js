@@ -5,39 +5,86 @@ const config = require('../utils/config');
 const { displayError } = require('../utils/errors');
 
 /**
- * Detect Canvas URL from token by trying common Canvas domains
- * and checking /api/v1/users/self endpoint
+ * Extract Canvas URL from error response
+ * Canvas API returns the full URL in error responses
+ */
+function extractUrlFromError(error) {
+  try {
+    // Check if error response contains a URL
+    if (error.response && error.response.request && error.response.request.res) {
+      const responseUrl = error.response.request.res.responseUrl;
+      if (responseUrl) {
+        const url = new URL(responseUrl);
+        return `${url.protocol}//${url.host}`;
+      }
+    }
+  } catch (e) {
+    return null;
+  }
+  return null;
+}
+
+/**
+ * Detect Canvas URL from token by trying common patterns
+ * Canvas tokens are scoped to specific instances, so we try to discover the URL
  */
 async function detectCanvasUrl(token) {
-  // Common Canvas LMS domains to try
-  const commonDomains = [
-    'https://clemson.instructure.com',
-    'https://canvas.clemson.edu',
+  console.log(chalk.blue('\n[*] Detecting Canvas URL from token...\n'));
+
+  // Strategy 1: Try generic instructure.com endpoint
+  // This will redirect or error with institution-specific info
+  const commonPatterns = [
     'https://canvas.instructure.com'
   ];
 
-  console.log(chalk.blue('\n[*] Detecting Canvas URL...\n'));
-
-  for (const domain of commonDomains) {
+  for (const baseUrl of commonPatterns) {
     try {
-      console.log(chalk.gray(`  Trying ${domain}...`));
-      const response = await axios.get(`${domain}/api/v1/users/self`, {
+      console.log(chalk.gray(`  Attempting auto-detection...`));
+      const response = await axios.get(`${baseUrl}/api/v1/users/self`, {
         headers: {
           'Authorization': `Bearer ${token}`
         },
-        timeout: 5000
+        timeout: 5000,
+        maxRedirects: 5,
+        validateStatus: () => true // Accept any status to analyze response
       });
 
       if (response.status === 200 && response.data.id) {
+        // Extract the actual URL from the successful request
+        const actualUrl = response.request.res.responseUrl || baseUrl;
+        const url = new URL(actualUrl);
+        const detectedUrl = `${url.protocol}//${url.host}`;
+
         console.log(chalk.green(`  [+] Found! Connected as: ${response.data.name}`));
-        return domain;
+        console.log(chalk.gray(`  Canvas URL: ${detectedUrl}`));
+        return detectedUrl;
       }
     } catch (error) {
-      // Continue trying other domains
-      continue;
+      // Try to extract URL from error
+      const extractedUrl = extractUrlFromError(error);
+      if (extractedUrl) {
+        // Verify the extracted URL works
+        try {
+          const verifyResponse = await axios.get(`${extractedUrl}/api/v1/users/self`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            timeout: 5000
+          });
+
+          if (verifyResponse.status === 200 && verifyResponse.data.id) {
+            console.log(chalk.green(`  [+] Found! Connected as: ${verifyResponse.data.name}`));
+            console.log(chalk.gray(`  Canvas URL: ${extractedUrl}`));
+            return extractedUrl;
+          }
+        } catch (verifyError) {
+          // Continue to manual entry
+        }
+      }
     }
   }
 
+  console.log(chalk.yellow('  [!] Could not auto-detect URL from token'));
   return null;
 }
 
@@ -72,11 +119,16 @@ async function authCommand() {
     if (!canvasUrl) {
       // If auto-detection fails, ask user for URL
       console.log(chalk.yellow('\n[!] Could not auto-detect Canvas URL'));
+      console.log(chalk.gray('Please enter your institution\'s Canvas URL'));
+      console.log(chalk.gray('Common formats:'));
+      console.log(chalk.gray('  - https://[school].instructure.com'));
+      console.log(chalk.gray('  - https://canvas.[school].edu\n'));
+
       const urlAnswer = await inquirer.prompt([
         {
           type: 'input',
           name: 'url',
-          message: 'Enter your Canvas URL (e.g., https://clemson.instructure.com):',
+          message: 'Enter your Canvas URL:',
           validate: (input) => {
             if (!input || !input.startsWith('http')) {
               return 'Please enter a valid URL starting with http:// or https://';

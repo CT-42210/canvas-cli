@@ -6,6 +6,38 @@ const asciify = require('asciify-image');
 const path = require('path');
 
 /**
+ * Extract institution name from Canvas URL
+ * e.g., https://clemson.instructure.com -> "Clemson"
+ *       https://canvas.university.edu -> "University"
+ */
+function extractInstitutionName(url) {
+  try {
+    const urlObj = new URL(url);
+    const hostname = urlObj.hostname;
+
+    // Pattern 1: [school].instructure.com
+    if (hostname.endsWith('.instructure.com')) {
+      const schoolName = hostname.split('.')[0];
+      return schoolName.charAt(0).toUpperCase() + schoolName.slice(1);
+    }
+
+    // Pattern 2: canvas.[school].edu or canvas.[school].[tld]
+    if (hostname.startsWith('canvas.')) {
+      const parts = hostname.split('.');
+      if (parts.length >= 3) {
+        const schoolName = parts[1];
+        return schoolName.charAt(0).toUpperCase() + schoolName.slice(1);
+      }
+    }
+
+    // Fallback: just return the hostname
+    return hostname;
+  } catch (error) {
+    return 'Unknown';
+  }
+}
+
+/**
  * Convert image to ASCII art
  */
 async function imageToAscii(imagePath, options = {}) {
@@ -56,6 +88,10 @@ function combineAsciiSideBySide(left, right, spacing = 4) {
 async function aboutCommand() {
   console.log('\n');
 
+  // Get Canvas URL if authenticated
+  const canvasUrl = config.getCanvasUrl();
+  const institutionName = canvasUrl ? extractInstitutionName(canvasUrl) : null;
+
   // Generate ASCII art for Canvas logo from local file
   const logoPath = path.join(__dirname, '../../canvas.png');
   const canvasAscii = await imageToAscii(logoPath, { width: 30, height: 18, color: false });
@@ -68,24 +104,41 @@ async function aboutCommand() {
     const info = [
       chalk.cyan.bold('CANVAS CLI'),
       '',
-      chalk.bold('Version: ') + chalk.green(`v${version}`),
-      chalk.bold('Author:  ') + chalk.yellow('Nick Troiano'),
-      chalk.bold('School:  ') + chalk.white('Clemson University'),
-      chalk.bold('GitHub:  ') + chalk.blue('https://github.com/CT-42210/canvas-cli'),
-      '',
-      chalk.gray('A modern CLI for Canvas LMS'),
-      chalk.gray('Built with Node.js, Inquirer, and Chalk')
+      chalk.bold('Version:  ') + chalk.green(`v${version}`),
+      chalk.bold('Author:   ') + chalk.yellow('Negative Space Software'),
+      chalk.bold('GitHub:   ') + chalk.blue('https://github.com/negative-space-software/canvas-cli'),
+      ''
     ];
+
+    // Add institution info if authenticated
+    if (institutionName && canvasUrl) {
+      info.push(chalk.bold('School:   ') + chalk.white(institutionName));
+      info.push(chalk.bold('Canvas:   ') + chalk.gray(canvasUrl));
+      info.push('');
+    } else {
+      info.push(chalk.yellow('Not authenticated - run ') + chalk.cyan('canvas auth'));
+      info.push('');
+    }
+
+    info.push(chalk.gray('A modern CLI for Canvas LMS'));
+    info.push(chalk.gray('Built with Node.js, Inquirer, and Chalk'));
 
     // Combine logo and info side by side
     const combined = combineAsciiSideBySide(redLogo, info.join('\n'), 8);
     console.log(combined.split('\n').map(line => '  ' + line).join('\n'));
   } else {
     // Fallback if logo fails to load
-    console.log(chalk.bold('  Version: ') + chalk.green(`v${version}`));
-    console.log(chalk.bold('  Author:  ') + chalk.yellow('Nick Troiano'));
-    console.log(chalk.bold('  School:  ') + chalk.hex('#F66733')('Clemson University'));
-    console.log(chalk.bold('  GitHub:  ') + chalk.blue('https://github.com/CT-42210/canvas-cli'));
+    console.log(chalk.bold('  Version:  ') + chalk.green(`v${version}`));
+    console.log(chalk.bold('  Author:   ') + chalk.yellow('Negative Space Software'));
+    console.log(chalk.bold('  GitHub:   ') + chalk.blue('https://github.com/negative-space-software/canvas-cli'));
+
+    if (institutionName && canvasUrl) {
+      console.log(chalk.bold('  School:   ') + chalk.white(institutionName));
+      console.log(chalk.bold('  Canvas:   ') + chalk.gray(canvasUrl));
+    } else {
+      console.log(chalk.yellow('\n  Not authenticated - run ') + chalk.cyan('canvas auth'));
+    }
+
     console.log(chalk.gray('\n  A modern CLI for Canvas LMS'));
     console.log(chalk.gray('  Built with Node.js, Inquirer, and Chalk'));
   }

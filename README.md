@@ -27,7 +27,7 @@ This makes the `canvas` command globally available.
 
 ### Get Your Canvas Token
 
-1. Log into Clemson Canvas
+1. Log into Canvas
 2. Go to Account → Settings
 3. Scroll to "Approved Integrations"
 4. Click "+ New Access Token"
