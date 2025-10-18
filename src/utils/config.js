@@ -1,8 +1,19 @@
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config({ quiet: true });
+const os = require('os');
 
-const ENV_PATH = path.join(__dirname, '../../.env');
+// Store config in user's home directory for consistent access
+const CONFIG_DIR = path.join(os.homedir(), '.canvas-cli');
+const ENV_PATH = path.join(CONFIG_DIR, '.env');
+
+// Ensure config directory exists
+if (!fs.existsSync(CONFIG_DIR)) {
+  fs.mkdirSync(CONFIG_DIR, { recursive: true });
+}
+
+// Load environment variables from the consistent location
+// quiet: true suppresses dotenv promotional/runtime messages
+require('dotenv').config({ path: ENV_PATH, quiet: true });
 
 /**
  * Get Canvas authentication token from .env file
