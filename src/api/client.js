@@ -1,3 +1,19 @@
+/*
+ * Copyright 2025 Negative Space Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const axios = require('axios');
 const config = require('../utils/config');
 
@@ -67,11 +83,12 @@ async function getAssignmentsForCourse(courseId) {
 
 /**
  * Get all assignments across all active courses
- * Returns array of assignments with course info attached
+ * Returns object with assignments array and skippedCourses array
  */
 async function getAllAssignments() {
   const courses = await getCourses();
   const allAssignments = [];
+  const skippedCourses = [];
 
   for (const course of courses) {
     try {
@@ -88,12 +105,15 @@ async function getAllAssignments() {
         });
       });
     } catch (error) {
-      // Skip courses that error (might be empty or restricted)
+      // Track courses that error due to 403 (API access restricted)
+      if (error.response && error.response.status === 403) {
+        skippedCourses.push(course.name);
+      }
       continue;
     }
   }
 
-  return allAssignments;
+  return { assignments: allAssignments, skippedCourses };
 }
 
 /**

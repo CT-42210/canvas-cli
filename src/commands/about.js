@@ -1,3 +1,19 @@
+/*
+ * Copyright 2025 Negative Space Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const chalk = require('chalk');
 const axios = require('axios');
 const config = require('../utils/config');
@@ -112,6 +128,7 @@ async function aboutCommand() {
       '',
       chalk.bold('Version:  ') + chalk.green(`v${version}`),
       chalk.bold('Author:   ') + chalk.yellow('Negative Space Software'),
+      chalk.bold('License:  ') + chalk.magenta('Apache License 2.0'),
       chalk.bold('GitHub:   ') + chalk.blue('https://github.com/negative-space-software/canvas-cli'),
       ''
     ];
@@ -143,6 +160,7 @@ async function aboutCommand() {
 
     console.log(chalk.bold('  Version:  ') + chalk.green(`v${version}`));
     console.log(chalk.bold('  Author:   ') + chalk.yellow('Negative Space Software'));
+    console.log(chalk.bold('  License:  ') + chalk.magenta('Apache License 2.0'));
     console.log(chalk.bold('  GitHub:   ') + chalk.blue('https://github.com/negative-space-software/canvas-cli'));
 
     if (institutionName && canvasUrl) {
@@ -158,6 +176,7 @@ async function aboutCommand() {
     // Fallback if both logos fail to load
     console.log(chalk.bold('  Version:  ') + chalk.green(`v${version}`));
     console.log(chalk.bold('  Author:   ') + chalk.yellow('Negative Space Software'));
+    console.log(chalk.bold('  License:  ') + chalk.magenta('Apache License 2.0'));
     console.log(chalk.bold('  GitHub:   ') + chalk.blue('https://github.com/negative-space-software/canvas-cli'));
 
     if (institutionName && canvasUrl) {
