@@ -12,7 +12,7 @@
   },
   "keywords": ["canvas", "lms", "cli", "education", "instructure"],
   "author": "Negative Space Software",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "type": "commonjs",
   "dependencies": {
     "asciify-image": "^0.1.10",
