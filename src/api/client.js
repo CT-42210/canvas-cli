@@ -46,11 +46,20 @@ async function getUserColors() {
 }
 
 /**
- * Get all active courses with custom colors
+ * Get user's dashboard course positions (display order)
+ */
+async function getDashboardPositions() {
+  const client = createClient();
+  const response = await client.get('/api/v1/users/self/dashboard_positions');
+  return response.data.dashboard_positions || {};
+}
+
+/**
+ * Get all active courses with custom colors and dashboard positions
  */
 async function getCourses() {
   const client = createClient();
-  const [coursesResponse, customColors] = await Promise.all([
+  const [coursesResponse, customColors, positions] = await Promise.all([
     client.get('/api/v1/courses', {
       params: {
         enrollment_state: 'active',
@@ -58,14 +67,19 @@ async function getCourses() {
         per_page: 100
       }
     }),
-    getUserColors()
+    getUserColors(),
+    getDashboardPositions()
   ]);
 
-  // Attach custom colors to courses
-  return coursesResponse.data.map(course => ({
+  // Attach custom colors and positions to courses
+  const courses = coursesResponse.data.map(course => ({
     ...course,
-    custom_color: customColors[`course_${course.id}`] || null
+    custom_color: customColors[`course_${course.id}`] || null,
+    dashboard_position: positions[`course_${course.id}`] ?? 999
   }));
+
+  // Sort by dashboard position
+  return courses.sort((a, b) => a.dashboard_position - b.dashboard_position);
 }
 
 /**
@@ -101,7 +115,8 @@ async function getAllAssignments() {
           course_name: course.name,
           course_code: course.course_code,
           course_color: course.custom_color,
-          course_id: course.id
+          course_id: course.id,
+          course_position: course.dashboard_position
         });
       });
     } catch (error) {

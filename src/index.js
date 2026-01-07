@@ -79,14 +79,16 @@ program
 // Assignment command
 program
   .command('assignment')
-  .description('Select and view assignment details (assignments due in next 3 days)')
-  .action(() => assignmentCommand({}));
-
-// Assignment all command
-program
-  .command('assignment-all')
-  .description('Select and view assignment details (all assignments)')
-  .action(() => assignmentCommand({ all: true }));
+  .description('Select and view assignment details')
+  .option('-d, --days <number>', 'Show assignments due within N days (default: CANVAS_DEFAULT_DAYS env)')
+  .option('-a, --all', 'Show all assignments')
+  .action((options) => {
+    if (options.all) {
+      assignmentCommand({ all: true });
+    } else {
+      assignmentCommand({ days: options.days ? parseInt(options.days, 10) : null });
+    }
+  });
 
 // Submit command
 program
@@ -115,8 +117,18 @@ program
 // Check if no command provided before parsing
 const args = process.argv.slice(2);
 if (args.length === 0) {
-  // Default to list command (assignments due in next 3 days)
-  listCommand({});
+  // Default: week view showing current week + N additional weeks
+  const { getWeekViewWeeks } = require('./utils/config');
+  const { getWeekEnd } = require('./utils/dates');
+  const weeks = getWeekViewWeeks();
+
+  // Calculate days until end of target week (Saturday)
+  const now = new Date();
+  const targetWeekEnd = getWeekEnd(now);
+  targetWeekEnd.setDate(targetWeekEnd.getDate() + (weeks * 7));
+  const daysUntilEnd = Math.ceil((targetWeekEnd - now) / (24 * 60 * 60 * 1000));
+
+  listCommand({ weekView: true, days: daysUntilEnd });
 } else {
   program.parse(process.argv);
 }

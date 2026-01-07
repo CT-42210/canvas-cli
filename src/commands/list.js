@@ -17,7 +17,7 @@
 const chalk = require('chalk');
 const { getAllAssignments } = require('../api/client');
 const { isDueWithinDays, isOverdue, isDue, sortByDueDate } = require('../utils/dates');
-const { displayAssignmentsList } = require('../ui/display');
+const { displayAssignmentsList, displayWeekView } = require('../ui/display');
 const { displayError, requireAuth } = require('../utils/errors');
 const config = require('../utils/config');
 
@@ -43,6 +43,9 @@ async function listCommand(options) {
     } else if (options.all) {
       // canvas list all
       filteredAssignments = allAssignments;
+    } else if (options.days) {
+      // canvas list with custom days filter
+      filteredAssignments = allAssignments.filter(a => isDueWithinDays(a, options.days));
     } else {
       // canvas list (default: next 3 days)
       filteredAssignments = allAssignments.filter(a => isDueWithinDays(a, 3));
@@ -51,7 +54,12 @@ async function listCommand(options) {
     // Sort by due date
     const sortedAssignments = sortByDueDate(filteredAssignments);
 
-    displayAssignmentsList(sortedAssignments);
+    // Use week view or standard list based on options
+    if (options.weekView) {
+      displayWeekView(sortedAssignments);
+    } else {
+      displayAssignmentsList(sortedAssignments);
+    }
 
     // Display warning for skipped courses
     if (skippedCourses.length > 0) {

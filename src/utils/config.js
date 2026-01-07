@@ -46,6 +46,43 @@ function getCanvasUrl() {
 }
 
 /**
+ * Get default days for assignment filtering from .env file
+ * Defaults to 3 if not set
+ */
+function getDefaultDays() {
+  const days = parseInt(process.env.CANVAS_DEFAULT_DAYS, 10);
+  return isNaN(days) ? 3 : days;
+}
+
+/**
+ * Get number of additional weeks to show in week view from .env file
+ * Defaults to 1 (this week + next week)
+ */
+function getWeekViewWeeks() {
+  const weeks = parseInt(process.env.CANVAS_WEEK_VIEW_WEEKS, 10);
+  return isNaN(weeks) ? 1 : weeks;
+}
+
+/**
+ * Get week start day from .env file
+ * Defaults to 'monday'. Options: sunday, monday, tuesday, wednesday, thursday, friday, saturday
+ * Returns 0-6 (Sunday=0, Monday=1, etc.)
+ */
+function getWeekStartDay() {
+  const dayMap = {
+    sunday: 0,
+    monday: 1,
+    tuesday: 2,
+    wednesday: 3,
+    thursday: 4,
+    friday: 5,
+    saturday: 6
+  };
+  const day = (process.env.CANVAS_WEEK_START || 'sunday').toLowerCase();
+  return dayMap[day] ?? 0;
+}
+
+/**
  * Save Canvas token and URL to .env file
  */
 function saveConfig(token, url) {
@@ -67,6 +104,9 @@ function isAuthenticated() {
 module.exports = {
   getToken,
   getCanvasUrl,
+  getDefaultDays,
+  getWeekViewWeeks,
+  getWeekStartDay,
   saveConfig,
   isAuthenticated
 };

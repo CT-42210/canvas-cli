@@ -17,10 +17,26 @@
 const chalk = require('chalk');
 const inquirer = require('inquirer');
 const open = require('open');
-const { formatDate, getDueDateColor } = require('../utils/dates');
+const { formatDate, getDueDateColor, groupByWeek, sortByDueDate } = require('../utils/dates');
 
 // Cache for course colors to ensure consistency
 const courseColorCache = new Map();
+
+/**
+ * Get terminal width, with fallback
+ */
+function getTerminalWidth() {
+  return process.stdout.columns || 80;
+}
+
+/**
+ * Truncate text to fit within maxLength, adding ellipsis if needed
+ */
+function truncate(text, maxLength) {
+  if (!text || text.length <= maxLength) return text;
+  if (maxLength <= 3) return '...'.slice(0, maxLength);
+  return text.slice(0, maxLength - 3) + '...';
+}
 
 /**
  * Get consistent color for course based on Canvas custom color or fallback
@@ -66,7 +82,7 @@ function displayAssignmentsList(assignments) {
     const dueDateColor = getDueDateColor(assignment.due_at);
 
     console.log(`${chalk.gray(`${index + 1}.`)} ${courseColor(`[${assignment.course_name}]`)} ${chalk.bold(assignment.name)}`);
-    console.log(`   Due: ${chalk[dueDateColor](dueDate)}`);
+    console.log(`   Due: ${chalk.hex(dueDateColor)(dueDate)}`);
 
     if (assignment.points_possible) {
       console.log(`   Points: ${assignment.points_possible}`);
@@ -88,7 +104,7 @@ async function displayAssignmentDetails(assignment) {
   console.log(chalk.bold('='.repeat(80)));
   console.log(chalk.bold(`\n${assignment.name}\n`));
 
-  console.log(chalk.gray('Due Date:'), chalk[dueDateColor](formatDate(assignment.due_at)));
+  console.log(chalk.gray('Due Date:'), chalk.hex(dueDateColor)(formatDate(assignment.due_at)));
 
   if (assignment.points_possible) {
     console.log(chalk.gray('Points:'), assignment.points_possible);
@@ -169,7 +185,7 @@ async function displayCourseDetails(course, filteredAssignments, allAssignments 
     upcoming.slice(0, 10).forEach((a, i) => {
       const dueDateColor = getDueDateColor(a.due_at);
       console.log(`  ${i + 1}. ${a.name}`);
-      console.log(`     Due: ${chalk[dueDateColor](formatDate(a.due_at))}\n`);
+      console.log(`     Due: ${chalk.hex(dueDateColor)(formatDate(a.due_at))}\n`);
     });
   }
 
@@ -200,9 +216,64 @@ async function displayCourseDetails(course, filteredAssignments, allAssignments 
   }
 }
 
+/**
+ * Display assignments grouped by week
+ */
+function displayWeekView(assignments) {
+  if (assignments.length === 0) {
+    console.log(chalk.yellow('\nNo upcoming assignments\n'));
+    return;
+  }
+
+  // Sort all assignments by due date first
+  const sorted = sortByDueDate(assignments);
+
+  // Group by week
+  const weeks = groupByWeek(sorted);
+
+  console.log(chalk.bold('\nUpcoming Assignments\n'));
+
+  const termWidth = getTerminalWidth();
+
+  weeks.forEach((week, weekIndex) => {
+    // Week header
+    console.log(chalk.bold.cyan(week.label));
+
+    week.assignments.forEach((assignment, i) => {
+      const courseColor = getCourseColor(assignment.course_name, assignment.course_id, assignment.course_color);
+      const dueDateColor = getDueDateColor(assignment.due_at);
+      const dueDate = formatDate(assignment.due_at);
+
+      // Tree-style connector
+      const isLast = i === week.assignments.length - 1;
+      const connector = isLast ? '└─' : '├─';
+
+      // Calculate available width for assignment name
+      // Format: "  ├─ [CourseName] AssignmentName"
+      // Prefix: 2 spaces + connector (2) + space (1) = 5 chars
+      // Course tag: brackets (2) + course name
+      const courseTag = `[${assignment.course_name}]`;
+      const prefixLen = 5 + courseTag.length + 1; // +1 for space after course tag
+      const availableWidth = termWidth - prefixLen - 1; // -1 for safety margin
+      const assignmentName = truncate(assignment.name, Math.max(availableWidth, 20));
+
+      console.log(`  ${chalk.gray(connector)} ${courseColor(courseTag)} ${assignmentName}`);
+      console.log(`  ${isLast ? '  ' : '│ '}  Due: ${chalk.hex(dueDateColor)(dueDate)}`);
+    });
+
+    // Add spacing between weeks (except last)
+    if (weekIndex < weeks.length - 1) {
+      console.log();
+    }
+  });
+
+  console.log();
+}
+
 module.exports = {
   displayAssignmentsList,
   displayAssignmentDetails,
   displayCourseDetails,
+  displayWeekView,
   getCourseColor
 };

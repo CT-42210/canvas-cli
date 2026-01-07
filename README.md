@@ -46,8 +46,8 @@ The CLI will auto-detect your Canvas URL and store credentials securely in `.env
 ### Assignments
 
 ```bash
-canvas                # List assignments due in next 3 days (default)
-canvas list           # Same as above
+canvas                # Week view - upcoming assignments grouped by week (configurable)
+canvas list           # List assignments due in next 3 days
 canvas list-all       # List all assignments
 canvas list-all-due   # List all upcoming assignments
 canvas list-all-overdue # List all overdue assignments
@@ -63,8 +63,9 @@ canvas class-all      # Select class, view all assignments
 ### Assignment Details
 
 ```bash
-canvas assignment     # Select class → assignment (next 3 days)
-canvas assignment-all # Select class → assignment (all assignments)
+canvas assignment           # Select class → assignment (uses CANVAS_DEFAULT_DAYS)
+canvas assignment -d 7      # Select class → assignment (next 7 days)
+canvas assignment -a        # Select class → assignment (all assignments)
 ```
 
 ### Submit Files
@@ -102,9 +103,11 @@ src/
 ## Visual Features
 
 ### Due Date Colors
-- **Red** - Due today
-- **Yellow** - Due tomorrow
-- **Green** - Due later
+Uses a gradient based on days until due:
+- **Red** - 1 day or less
+- **Orange/Yellow** - 2-7 days (gradient)
+- **Yellow/Green** - 7-13 days (gradient)
+- **Green** - 13+ days
 
 ### Course Colors
 - Uses your custom Canvas course colors
@@ -113,9 +116,19 @@ src/
 
 ## Configuration
 
-Settings stored in `.env`:
+Settings stored in `~/.canvas-cli/.env`:
 - `CANVAS_TOKEN` - Your Canvas API token
 - `CANVAS_URL` - Auto-detected Canvas instance URL
+- `CANVAS_DEFAULT_DAYS` - Default days for `canvas assignment` filtering (default: 3)
+- `CANVAS_WEEK_VIEW_WEEKS` - Additional weeks beyond current week to show (1 = this week + next week, 2 = this week + 2 more weeks, default: 1)
+- `CANVAS_WEEK_START` - Day the week starts on (sunday, monday, tuesday, wednesday, thursday, friday, saturday; default: sunday)
+
+## Sorting Behavior
+
+Assignments and courses respect your Canvas dashboard ordering:
+- **Week view (`canvas`)**: Grouped by week (configurable start day, default Sunday), then sorted by your dashboard course order, then by due date
+- **Course selection**: Courses appear in your dashboard order
+- To change the order, drag courses on your Canvas dashboard
 
 **Note:** The `.env` file is gitignored and should never be committed.
 

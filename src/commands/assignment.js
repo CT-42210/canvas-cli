@@ -21,6 +21,7 @@ const { displayAssignmentDetails } = require('../ui/display');
 const { displayError, requireAuth } = require('../utils/errors');
 const { isDueWithinDays, sortByDueDate } = require('../utils/dates');
 const config = require('../utils/config');
+const { getDefaultDays } = require('../utils/config');
 
 /**
  * Assignment command - select course, then assignment, then view details
@@ -61,8 +62,9 @@ async function assignmentCommand(options) {
 
     // Filter based on options
     if (!options.all) {
-      // Default: only show assignments due within 3 days
-      assignments = assignments.filter(a => isDueWithinDays(a, 3));
+      // Use --days flag if provided, otherwise use env default
+      const days = options.days || getDefaultDays();
+      assignments = assignments.filter(a => isDueWithinDays(a, days));
     }
 
     if (assignments.length === 0) {
