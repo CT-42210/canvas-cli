@@ -16,7 +16,7 @@ Commands and descriptions
 
 canvas auth - add canvas auth token to enviroment
 
-canvas - show upcoming assignments in a week view, grouped by week (start day configurable via CANVAS_WEEK_START, default sunday). shows current week + CANVAS_WEEK_VIEW_WEEKS additional weeks (env setting, default 1 = this week + next week). within each week, assignments are sorted by dashboard course order, then by due date.
+canvas - show upcoming assignments in a week view, grouped by week (start day configurable via CANVAS_WEEK_START, default sunday). shows current week + CANVAS_WEEK_VIEW_WEEKS additional weeks (env setting, default 1 = this week + next week). within each week, assignments are sorted by due date, then by dashboard course order.
 
 canvas list - list all assignments with duedates within the next three days list items by this heiarchy: due date, class order in canvas
 

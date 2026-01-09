@@ -287,9 +287,30 @@ function groupByWeek(assignments) {
   // Sort weeks chronologically, then sort assignments within each week
   const sortedWeeks = Array.from(groups.values()).sort((a, b) => a.weekStart - b.weekStart);
 
-  // Sort assignments within each week by course position, then due date
+  // Sort assignments within each week by due date, then course position
   sortedWeeks.forEach(week => {
-    week.assignments = sortByCoursePositionThenDate(week.assignments);
+    week.assignments = week.assignments.sort((a, b) => {
+      // Sort by due date first
+      if (!a.due_at && !b.due_at) {
+        const posA = a.course_position ?? 999;
+        const posB = b.course_position ?? 999;
+        return posA - posB;
+      }
+      if (!a.due_at) return 1;
+      if (!b.due_at) return -1;
+
+      const dateA = new Date(a.due_at);
+      const dateB = new Date(b.due_at);
+
+      if (dateA.getTime() !== dateB.getTime()) {
+        return dateA - dateB;
+      }
+
+      // If same due date, sort by course position
+      const posA = a.course_position ?? 999;
+      const posB = b.course_position ?? 999;
+      return posA - posB;
+    });
   });
 
   return sortedWeeks;
