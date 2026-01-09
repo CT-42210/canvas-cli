@@ -102,6 +102,13 @@ src/
 
 ## Visual Features
 
+### Date Formatting
+Due dates display with friendly named days:
+- **Today** → "Today at 14:00"
+- **Tomorrow** → "Tomorrow at 14:00"
+- **Within 7 days** → Day name (e.g., "Sunday at 14:00")
+- **Beyond 7 days** → Full date (e.g., "Jan 15, 2025 at 14:00")
+
 ### Due Date Colors
 Uses a gradient based on days until due:
 - **Red** - 1 day or less

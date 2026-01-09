@@ -83,6 +83,11 @@ function sortByDueDate(assignments) {
 
 /**
  * Format a date for display using system locale and format settings
+ * Shows named days for dates within a week:
+ * - Today → "Today at HH:MM"
+ * - Tomorrow → "Tomorrow at HH:MM"
+ * - Within 7 days → "Sunday at HH:MM", etc.
+ * - Beyond 7 days → "Jan 15, 2025 at HH:MM"
  */
 function formatDate(dateString) {
   if (!dateString) return 'No due date';
@@ -111,6 +116,14 @@ function formatDate(dateString) {
   tomorrow.setDate(tomorrow.getDate() + 1);
   if (date.toDateString() === tomorrow.toDateString()) {
     return `Tomorrow at ${date.toLocaleTimeString(undefined, timeOptions)}`;
+  }
+
+  // Check if it's within 7 days - show day name
+  const sevenDaysFromNow = new Date(now);
+  sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+  if (date > now && date < sevenDaysFromNow) {
+    const dayName = date.toLocaleDateString(undefined, { weekday: 'long' });
+    return `${dayName} at ${date.toLocaleTimeString(undefined, timeOptions)}`;
   }
 
   // Otherwise show full date and time using system default
