@@ -10,7 +10,7 @@ A modern command-line interface for any University's Canvas LMS.
 - File submission support (select class → assignment → file)
 - Quick browser integration
 - Custom Canvas course colors
-- Color-coded due dates (red = today, yellow = tomorrow, green = later)
+- Color-coded due dates (red → yellow → green → blue gradient)
 - 24-hour time format support
 - Raw API access for advanced users
 
@@ -112,9 +112,10 @@ Due dates display with friendly named days:
 ### Due Date Colors
 Uses a gradient based on days until due:
 - **Red** - 1 day or less
-- **Orange/Yellow** - 2-7 days (gradient)
-- **Yellow/Green** - 7-13 days (gradient)
-- **Green** - 13+ days
+- **Red/Yellow** - 1-4 days (gradient)
+- **Yellow/Green** - 4-7 days (gradient)
+- **Green/Blue** - 7-14 days (gradient)
+- **Blue** - 14+ days
 
 ### Course Colors
 - Uses your custom Canvas course colors

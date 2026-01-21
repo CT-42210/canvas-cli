@@ -130,10 +130,12 @@ src/
    }
    ```
 
-3. **Due Date Coloring** - Urgency-based coloring
-   - **Red** - Due today
-   - **Yellow** - Due tomorrow
-   - **Green** - Due later
+3. **Due Date Coloring** - Urgency-based coloring with gradients
+   - **Red** - 1 day or less
+   - **Red → Yellow** - 1-4 days
+   - **Yellow → Green** - 4-7 days
+   - **Green → Blue** - 7-14 days
+   - **Blue** - 14+ days
 
 ### Color Fetching Flow:
 ```

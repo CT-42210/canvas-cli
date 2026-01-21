@@ -138,14 +138,16 @@ function lerp(start, end, t) {
 }
 
 /**
- * Get color for due date based on urgency (gradient from green to yellow to red)
- * - 13+ days out: pure green (#00FF00)
- * - 7 days out: pure yellow (#FFFF00)
- * - 1 day or less: pure red (#FF0000)
+ * Get color for due date based on urgency (gradient from blue to green to yellow to red)
+ * - 14+ days out: pure blue
+ * - 7-14 days: green to blue gradient
+ * - 4-7 days: yellow to green gradient
+ * - 1-4 days: red to yellow gradient
+ * - 1 day or less: pure red
  * Returns a hex color string
  */
 function getDueDateColor(dateString) {
-  if (!dateString) return '#5FAF5F'; // soft green for no due date
+  if (!dateString) return '#5F87AF'; // soft blue for no due date
 
   const date = new Date(dateString);
   const now = new Date();
@@ -158,27 +160,34 @@ function getDueDateColor(dateString) {
   const red = { r: 215, g: 95, b: 95 };      // #D75F5F - soft red
   const yellow = { r: 215, g: 175, b: 95 };  // #D7AF5F - soft amber
   const green = { r: 95, g: 175, b: 95 };    // #5FAF5F - soft green
+  const blue = { r: 95, g: 135, b: 175 };    // #5F87AF - soft blue
 
   let r, g, b;
 
   if (daysUntilDue <= 1) {
     // Pure red for 1 day or less
     r = red.r; g = red.g; b = red.b;
-  } else if (daysUntilDue <= 7) {
-    // Gradient from red (1 day) to yellow (7 days)
-    const t = (daysUntilDue - 1) / 6; // 0 at 1 day, 1 at 7 days
+  } else if (daysUntilDue <= 4) {
+    // Gradient from red (1 day) to yellow (4 days)
+    const t = (daysUntilDue - 1) / 3; // 0 at 1 day, 1 at 4 days
     r = lerp(red.r, yellow.r, t);
     g = lerp(red.g, yellow.g, t);
     b = lerp(red.b, yellow.b, t);
-  } else if (daysUntilDue <= 13) {
-    // Gradient from yellow (7 days) to green (13 days)
-    const t = (daysUntilDue - 7) / 6; // 0 at 7 days, 1 at 13 days
+  } else if (daysUntilDue <= 7) {
+    // Gradient from yellow (4 days) to green (7 days)
+    const t = (daysUntilDue - 4) / 3; // 0 at 4 days, 1 at 7 days
     r = lerp(yellow.r, green.r, t);
     g = lerp(yellow.g, green.g, t);
     b = lerp(yellow.b, green.b, t);
+  } else if (daysUntilDue <= 14) {
+    // Gradient from green (7 days) to blue (14 days)
+    const t = (daysUntilDue - 7) / 7; // 0 at 7 days, 1 at 14 days
+    r = lerp(green.r, blue.r, t);
+    g = lerp(green.g, blue.g, t);
+    b = lerp(green.b, blue.b, t);
   } else {
-    // Pure green for 13+ days
-    r = green.r; g = green.g; b = green.b;
+    // Pure blue for 14+ days
+    r = blue.r; g = blue.g; b = blue.b;
   }
 
   // Convert to hex

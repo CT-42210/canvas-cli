@@ -18,7 +18,7 @@ Canvas CLI is a command-line interface for interacting with Canvas LMS (by Instr
 - **Display System**: CLI popup-style displays with numbered action items
 - **Color Scheme**:
   - Uses user's custom Canvas course colors from `/api/v1/users/self/colors`
-  - Color-coded due dates (red = today, yellow = tomorrow, green = later)
+  - Color-coded due dates (red ≤1 day, yellow ~4 days, green ~7 days, blue 14+ days)
   - 24-hour time format
   - Clean text icons (no emojis)
 
