@@ -33,6 +33,18 @@ function isDueWithinDays(assignment, days) {
 }
 
 /**
+ * Check if the current user has submitted an assignment.
+ * Uses the per-user `submission` object (from include[]=submission),
+ * NOT `has_submitted_submissions`, which reflects any student in the course.
+ */
+function isSubmitted(assignment) {
+  const sub = assignment.submission;
+  if (!sub) return false;
+  if (sub.submitted_at) return true;
+  return ['submitted', 'graded', 'pending_review'].includes(sub.workflow_state);
+}
+
+/**
  * Check if an assignment is overdue
  */
 function isOverdue(assignment) {
@@ -42,7 +54,7 @@ function isOverdue(assignment) {
   const dueDate = new Date(assignment.due_at);
 
   // Consider it overdue only if past due and not submitted
-  return dueDate < now && !assignment.has_submitted_submissions;
+  return dueDate < now && !isSubmitted(assignment);
 }
 
 /**
@@ -340,6 +352,7 @@ function groupByWeek(assignments) {
 
 module.exports = {
   isDueWithinDays,
+  isSubmitted,
   isOverdue,
   isDue,
   sortByDueDate,

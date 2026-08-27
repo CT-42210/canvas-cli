@@ -16,6 +16,17 @@
 
 const inquirer = require('inquirer');
 const chalk = require('chalk');
+const { isSubmitted } = require('../utils/dates');
+
+function submittedLabel(assignment) {
+  if (!isSubmitted(assignment)) return '';
+  const sub = assignment.submission;
+  const pts = assignment.points_possible;
+  if (sub.score !== null && sub.score !== undefined && pts) {
+    return (sub.score / pts >= 0.95 ? chalk.green : chalk.yellow)(` [${sub.score}/${pts}]`);
+  }
+  return chalk.green(' [submitted]');
+}
 
 /**
  * Display an interactive selection menu
@@ -62,7 +73,7 @@ async function selectAssignment(assignments) {
   }
 
   const choices = assignments.map(assignment => ({
-    name: `[${assignment.course_name}] ${assignment.name}`,
+    name: `[${assignment.course_name}] ${assignment.name}${submittedLabel(assignment)}`,
     value: assignment
   }));
 

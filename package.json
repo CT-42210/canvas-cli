@@ -4,7 +4,7 @@
   "description": "CLI tool for Canvas LMS - works with any university or school",
   "main": "src/index.js",
   "bin": {
-    "canvas-cli": "./src/index.js"
+    "canvas-cli": "src/index.js"
   },
   "files": [
     "src/",
@@ -17,7 +17,13 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/index.js"
   },
-  "keywords": ["canvas", "lms", "cli", "education", "instructure"],
+  "keywords": [
+    "canvas",
+    "lms",
+    "cli",
+    "education",
+    "instructure"
+  ],
   "author": "Negative Space Software",
   "license": "Apache-2.0",
   "type": "commonjs",

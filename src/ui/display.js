@@ -17,7 +17,7 @@
 const chalk = require('chalk');
 const inquirer = require('inquirer');
 const open = require('open');
-const { formatDate, getDueDateColor, groupByWeek, sortByDueDate, getWeekEnd } = require('../utils/dates');
+const { formatDate, getDueDateColor, groupByWeek, sortByDueDate, getWeekEnd, isSubmitted } = require('../utils/dates');
 const { getWeekViewWeeks } = require('../utils/config');
 const { getTerminalWidth, truncate } = require('./format');
 
@@ -52,6 +52,27 @@ function getCourseColor(courseName, courseId, customColor) {
 }
 
 /**
+ * Build a "[submitted]" tag for an assignment the current user has turned in.
+ * Returns { text, width } so callers can reserve space when truncating names.
+ */
+function submittedTag(assignment) {
+  if (!isSubmitted(assignment)) return { text: '', width: 0 };
+  const sub = assignment.submission;
+  const pts = assignment.points_possible;
+
+  // Graded with a score: show progress (external tools like Mastering pass back
+  // partial scores, so "graded" does not mean "finished")
+  if (sub.score !== null && sub.score !== undefined && pts) {
+    const label = ` [${sub.score}/${pts}]`;
+    const color = sub.score / pts >= 0.95 ? chalk.green : chalk.yellow;
+    return { text: color(label), width: label.length };
+  }
+
+  const label = ' [submitted]';
+  return { text: chalk.green(label), width: label.length };
+}
+
+/**
  * Display a list of assignments in tree format
  */
 function displayAssignmentsList(assignments) {
@@ -77,9 +98,10 @@ function displayAssignmentsList(assignments) {
     const courseTag = `[${assignment.course_name}]`;
     const prefixLen = 5 + courseTag.length + 1; // 2 spaces + connector (2) + space (1) + course tag + space
     const availableWidth = termWidth - prefixLen - 1;
-    const assignmentName = truncate(assignment.name, Math.max(availableWidth, 20));
+    const tag = submittedTag(assignment);
+    const assignmentName = truncate(assignment.name, Math.max(availableWidth - tag.width, 20));
 
-    console.log(`  ${chalk.gray(connector)} ${courseColor(courseTag)} ${assignmentName}`);
+    console.log(`  ${chalk.gray(connector)} ${courseColor(courseTag)} ${assignmentName}${tag.text}`);
     console.log(`  ${isLast ? '  ' : '│ '}  Due: ${chalk.hex(dueDateColor)(dueDate)}`);
   });
 
@@ -99,6 +121,21 @@ async function displayAssignmentDetails(assignment) {
   console.log(chalk.bold(`\n${assignment.name}\n`));
 
   console.log(chalk.gray('Due Date:'), chalk.hex(dueDateColor)(formatDate(assignment.due_at)));
+
+  if (isSubmitted(assignment)) {
+    const sub = assignment.submission;
+    const when = sub.submitted_at ? ` (${formatDate(sub.submitted_at)})` : '';
+    const pts = assignment.points_possible;
+    if (sub.score !== null && sub.score !== undefined && pts) {
+      const color = sub.score / pts >= 0.95 ? chalk.green : chalk.yellow;
+      console.log(chalk.gray('Status:'), color(`Graded ${sub.score}/${pts}${when}`));
+    } else {
+      const state = sub.workflow_state === 'graded' ? 'Graded' : 'Submitted';
+      console.log(chalk.gray('Status:'), chalk.green(`${state}${when}`));
+    }
+  } else {
+    console.log(chalk.gray('Status:'), chalk.yellow('Not submitted'));
+  }
 
   if (assignment.points_possible) {
     console.log(chalk.gray('Points:'), assignment.points_possible);
@@ -200,9 +237,10 @@ async function displayCourseDetails(course, filteredAssignments, allAssignments 
         // Calculate available width for assignment name
         const prefixLen = 5; // 2 spaces + connector (2) + space (1)
         const availableWidth = termWidth - prefixLen - 1;
-        const assignmentName = truncate(a.name, Math.max(availableWidth, 20));
+        const tag = submittedTag(a);
+        const assignmentName = truncate(a.name, Math.max(availableWidth - tag.width, 20));
 
-        console.log(`  ${chalk.gray(connector)} ${assignmentName}`);
+        console.log(`  ${chalk.gray(connector)} ${assignmentName}${tag.text}`);
         console.log(`  ${isLast ? '  ' : '│ '}  Due: ${chalk.hex(dueDateColor)(dueDate)}`);
       });
 
@@ -281,9 +319,10 @@ function displayWeekView(assignments) {
       const courseTag = `[${assignment.course_name}]`;
       const prefixLen = 5 + courseTag.length + 1; // +1 for space after course tag
       const availableWidth = termWidth - prefixLen - 1; // -1 for safety margin
-      const assignmentName = truncate(assignment.name, Math.max(availableWidth, 20));
+      const tag = submittedTag(assignment);
+      const assignmentName = truncate(assignment.name, Math.max(availableWidth - tag.width, 20));
 
-      console.log(`  ${chalk.gray(connector)} ${courseColor(courseTag)} ${assignmentName}`);
+      console.log(`  ${chalk.gray(connector)} ${courseColor(courseTag)} ${assignmentName}${tag.text}`);
       console.log(`  ${isLast ? '  ' : '│ '}  Due: ${chalk.hex(dueDateColor)(dueDate)}`);
     });
 

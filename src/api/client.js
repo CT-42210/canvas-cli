@@ -89,7 +89,8 @@ async function getAssignmentsForCourse(courseId) {
   const client = createClient();
   const response = await client.get(`/api/v1/courses/${courseId}/assignments`, {
     params: {
-      per_page: 100
+      per_page: 100,
+      include: ['submission']
     }
   });
   return response.data;
