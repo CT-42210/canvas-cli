@@ -1,6 +1,6 @@
 {
   "name": "@negative-space-software/canvas-cli",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "CLI tool for Canvas LMS - works with any university or school",
   "main": "src/index.js",
   "bin": {
